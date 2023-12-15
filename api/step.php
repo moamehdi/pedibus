@@ -104,7 +104,7 @@ elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
         echo json_encode(["message" => "Erreur lors de la mise à jour de l'étape"]);
     }
 } else {
-    http_response_code(405); // Method Not Allowed
+    http_response_code(405);
     echo json_encode(["message" => "Méthode HTTP non supportée"]);
 }
 

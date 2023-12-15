@@ -10,7 +10,7 @@ header("Access-Control-Allow-Headers: *");
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-    $upd = $cnx->prepare("SELECT name, departure_hour, arrival_hour, is_active FROM line WHERE id = ?");
+    $upd = $cnx->prepare("SELECT id, name, departure_hour, arrival_hour, is_active FROM line WHERE id = ?");
     
     $upd->bindParam(1, $id, PDO::PARAM_INT);
 
@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     if ($line) {
         $data[] = [
+            "id" => $line['id'],
             "name" => $line['name'],
             "departure_hour" => $line["departure_hour"],
             "arrival_hour" => $line["arrival_hour"],

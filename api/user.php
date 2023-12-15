@@ -8,12 +8,13 @@ header("Access-Control-Allow-Headers: *");
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    $personnes = $cnx->query("SELECT last_name, first_name, birthdate,address,zipcode,phone_number_1,phone_number_2,mail FROM user");
+    $personnes = $cnx->query("SELECT id, last_name, first_name, birthdate,address,zipcode,phone_number_1,phone_number_2,mail FROM user");
 
     $data = array();
 
     foreach ($personnes as $personne) {
         $data[] = [
+            "id" => $personne['id'],
             "last_name" => $personne['last_name'],
             "first_name" => $personne["first_name"],
             "birthdate" => $personne["birthdate"],

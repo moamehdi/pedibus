@@ -9,50 +9,48 @@ header("Access-Control-Allow-Headers: *");
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    $lines = $cnx->query("SELECT name, departure_hour, arrival_hour,is_active FROM line");
+    $lines = $cnx->query("SELECT ls.id, ls.name, ls.hour, ls.type, ls.id_line, lt.name AS line_name
+                          FROM step ls
+                          JOIN line lt ON ls.id_line = lt.id");
 
     $data = array();
-
     foreach ($lines as $line) {
         $data[] = [
+            "id" => $line['id'],
             "name" => $line['name'],
-            "departure_hour" => $line["departure_hour"],
-            "arrival_hour" => $line["arrival_hour"],
-            "is_active" => $line["is_active"],
+            "hour" => $line["hour"],
+            "type" => $line["type"],
+            "line_name" => $line["line_name"],
         ];
     }
 
     echo json_encode($data);
 }
-
 elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Obtenir l'heure actuelle au format datetime
     $currentDateTime = date('Y-m-d H:i:s');
-    $upd = $cnx->prepare("INSERT INTO line SET name = ?, departure_hour = ?, arrival_hour = ?, is_active = ?, id_user_ref = ?,created_at = ?, updated_at = ?");
+    $upd = $cnx->prepare("INSERT INTO step SET name = ?, hour = ?, type = ?, id_line = ?, created_at = ?, updated_at = ?");
     
     if ($upd->execute([
         $_POST['name'],
-        $_POST['departure_hour'],
-        $_POST['arrival_hour'],
-        $_POST['is_active'],
-        $_POST['id_user_ref'],
+        $_POST['hour'],
+        $_POST['type'],
+        $_POST['id_line'],
         $currentDateTime,  
         $currentDateTime  
     ])) {
-        echo json_encode(["message" => "ligne créé avec succès"]);
+        echo json_encode(["message" => "étape créé avec succès"]);
     } else {
-        echo json_encode(["message" => "Erreur lors de la création de la ligne"]);
+        echo json_encode(["message" => "Erreur lors de la création de l'étape"]);
     }
 }
-
 elseif ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
     $parse = file_get_contents('php://input');
     $data = json_decode($parse);
-    $upd = $cnx->prepare("DELETE FROM line WHERE id = ?");
+    $upd = $cnx->prepare("DELETE FROM step WHERE id = ?");
     if ($upd->execute([$data->id])) {
-        echo json_encode(["message" => "ligne supprimée avec succès"]);
+        echo json_encode(["message" => "étape supprimée avec succès"]);
     } else {
-        echo json_encode(["message" => "Erreur lors de la suppression de la ligne"]);
+        echo json_encode(["message" => "Erreur lors de la suppression de l'étape"]);
     }
 }
 elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
@@ -60,7 +58,7 @@ elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
     $data = json_decode($parse);
     $currentDateTime = date('Y-m-d H:i:s');
     if (!isset($data->id)) {
-        echo json_encode(["message" => "L'id est requis pour modifier une ligne"]);
+        echo json_encode(["message" => "L'id est requis pour modifier une étape"]);
         http_response_code(400); 
         exit;
     }
@@ -73,23 +71,18 @@ elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
         $params[] = $data->name;
     }
 
-    if (isset($data->departure_hour)) {
-        $setValues[] = "departure_hour = ?";
-        $params[] = $data->departure_hour;
+    if (isset($data->hour)) {
+        $setValues[] = "hour = ?";
+        $params[] = $data->hour;
     }
-    if (isset($data->arrival_hour)) {
-        $setValues[] = "arrival_hour = ?";
-        $params[] = $data->arrival_hour;
-    }
-    
-    if (isset($data->is_active)) {
-        $setValues[] = "is_active = ?";
-        $params[] = $data->is_active;
+    if (isset($data->type)) {
+        $setValues[] = "type = ?";
+        $params[] = $data->type;
     }
     
-    if (isset($data->id_user_ref)) {
-        $setValues[] = "id_user_ref = ?";
-        $params[] = $data->id_user_ref;
+    if (isset($data->id_line)) {
+        $setValues[] = "id_line = ?";
+        $params[] = $data->id_line;
     }
     
     $setValues[] = "updated_at = ?";
@@ -103,10 +96,10 @@ elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
 
     $params[] = $data->id; 
     $setClause = implode(', ', $setValues);
-    $upd = $cnx->prepare("UPDATE line SET $setClause WHERE id = ?");
+    $upd = $cnx->prepare("UPDATE step SET $setClause WHERE id = ?");
     
     if ($upd->execute($params)) {
-        echo json_encode(["message" => "ligne mis à jour avec succès"]);
+        echo json_encode(["message" => "étape mis à jour avec succès"]);
     } else {
         echo json_encode(["message" => "Erreur lors de la mise à jour de l'étape"]);
     }
@@ -114,4 +107,6 @@ elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
     http_response_code(405); // Method Not Allowed
     echo json_encode(["message" => "Méthode HTTP non supportée"]);
 }
+
+
 ?>

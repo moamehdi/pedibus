@@ -28,12 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     echo json_encode($data);
 }
 elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Obtenir l'heure actuelle au format datetime
     $hashedPassword = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $currentDateTime = date('Y-m-d H:i:s');
     $upd = $cnx->prepare("INSERT INTO user SET last_name = ?, first_name = ?, birthdate = ?, address = ?, zipcode = ?, phone_number_1 = ?,phone_number_2 = ?, mail = ?, password = ?, created_at = ?, updated_at = ?");
 
-    // On exécute la requête avec les autres valeurs de $_POST
     if ($upd->execute([
         $_POST['lastName'],
         $_POST['firstName'],
@@ -44,8 +42,8 @@ elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_POST['phone_number_2'],
         $_POST['mail'],
         $hashedPassword,
-        $currentDateTime,  // Utiliser l'heure actuelle pour created_at
-        $currentDateTime   // Utiliser l'heure actuelle pour updated_at
+        $currentDateTime,  
+        $currentDateTime  
     ])) {
         echo json_encode(["message" => "Utilisateur créé avec succès"]);
     } else {
@@ -69,7 +67,7 @@ elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
     $currentDateTime = date('Y-m-d H:i:s');
     if (!isset($data->id)) {
         echo json_encode(["message" => "L'id est requis pour modifier un user"]);
-        http_response_code(400); // Bad Request
+        http_response_code(400);
         exit;
     }
 
@@ -125,11 +123,11 @@ elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
 
     if (empty($setValues)) {
         echo json_encode(["message" => "Aucune données a modifier"]);
-        http_response_code(400); // Bad Request
+        http_response_code(400); 
         exit;
     }
 
-    $params[] = $data->id; // Add the ID to the parameters
+    $params[] = $data->id; 
     $setClause = implode(', ', $setValues);
     $upd = $cnx->prepare("UPDATE user SET $setClause WHERE id = ?");
     
@@ -139,8 +137,7 @@ elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
         echo json_encode(["message" => "Erreur lors de la mise à jour de l'utilisateur"]);
     }
 } else {
-    // Unsupported HTTP method
-    http_response_code(405); // Method Not Allowed
+    http_response_code(405); 
     echo json_encode(["message" => "Méthode HTTP non supportée"]);
 }
 
